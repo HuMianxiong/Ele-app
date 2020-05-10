@@ -5,27 +5,98 @@
               <i class="fa fa-search"></i>
               <input v-model="city_val" type="text" placeholder="输入城市名">
           </div>
-          <button @click="$router.go(-1)">取消</button>
+          <button @click="$router.push({name:'address',params:{city:city}})">取消</button>
       </div>
-      <div>
+      <div style="height:100%" v-if="searchList.length === 0">
           <div class="location">
-              <Location :address="city"/>
+              <Location :address="city" @click="selectCity({name:city})"/>
           </div>
+          <Alphabet @selectCity='selectCity'  :cityInfo="cityInfo" :keys="keys" ref="allcity"/>
       </div>
+      <div class="search_list" v-else>
+          <ul>
+              <li @click="selectCity(item)"  v-for="(item,index) in searchList" :key="index">{{item.name}}</li>
+          </ul>
+      </div>
+
   </div>
 </template>
 
 <script>
 import Location from '../components/Location.vue'
+import Alphabet from '../components/Alphabet'
 export default {
     name:"City",
     data(){
         return{
-            city_val:""
+            city_val:"",
+            cityInfo:null,
+            keys:[],
+            allCities:[],
+            searchList:[]
         }
     },
     components:{
-        Location
+        Location,
+        Alphabet
+    },
+    created(){
+        this.getCityInfo();
+    },
+    watch:{
+        city_val(){
+            // console.log(this.city_val)
+            this.searchCity();
+        }
+    },
+    methods:{
+        getCityInfo(){
+            this.$axios("/api/posts/cities").then((res)=>{
+                console.log(res.data);
+                this.cityInfo = res.data;
+                //处理key 计算key
+                this.keys = Object.keys(res.data)
+                // console.log(this.keys)
+                //hotcities这个key移除掉
+                this.keys.pop();
+                //keys排序
+                this.keys.sort();
+                // console.log(this.keys)
+                this.$nextTick(()=>{
+                    this.$refs.allcity.initScroll()
+                })
+
+                //存储所有城市，用来搜索过滤
+                this.keys.forEach(key=>{
+                    // console.log(key)
+                    this.cityInfo[key].forEach(city=>{
+                        // console.log(city)
+                        this.allCities.push(city)
+                    })
+                })
+            })
+            .catch(err=>{
+                console.log(err)
+            })
+        },
+        selectCity(city){
+            // console.log(city)
+            this.$router.push({name:'address',params:{city:city.name}})
+        },
+        searchCity(){
+            //如果搜索框为空，数组置空
+            if(!this.city_val){
+                this.searchList = [];
+            } 
+            else{
+                //根据输入框的关键字检索城市，并存入到searchList数组中
+                this.searchList = this.allCities.filter(item=>{
+                    return item.name.indexOf(this.city_val)!=-1
+                });
+                // console.log(this.searchList)
+            }
+
+        }
     },
     computed:{
         city(){
@@ -84,4 +155,12 @@ export default {
     box-sizing: border-box;
 }
 
+.search_list{
+    background: #fff;
+    padding:5px 16px;
+}
+.search_list li{
+    padding:10px;
+    border-bottom: 1px solid #eee;
+}
 </style>

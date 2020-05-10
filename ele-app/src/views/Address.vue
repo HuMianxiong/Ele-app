@@ -10,7 +10,7 @@
         <i class="fa fa-search"></i>
         <input type="text" v-model="search_val" placeholder="小区/写字楼/学校等" />
       </div>
-      <Location :address="address" />
+      <Location @click="selectAddress" :address="address" />
     </div>
     <div class="area">
         <ul class="area_list" v-for="(item,index) in areaList" :key="index">
@@ -60,7 +60,12 @@ export default {
     },
     selectAddress(item){
         //设置地址
-        this.$store.dispatch("setAddress",item.district+item.address+item.name);
+        if(item){
+              this.$store.dispatch("setAddress",item.district+item.address+item.name);
+        }
+        else{
+          this.$store.dispatch("setAddress",this.address)
+        }
         //跳转home
         this.$router.push("/home")
     }
@@ -75,7 +80,7 @@ export default {
     Location
   },
   beforeRouteEnter(to, from, next) {
-    // console.log(to)
+     console.log(to.params.city+'test')
     next(vm => {
       vm.city = to.params.city;
     });

@@ -28,6 +28,16 @@ Vue.use(VueRouter)
         path:'/me',
         name:"me",
         component:()=>import("../views/Me.vue")
+      },
+      {
+        path:'/address',
+        name:'address',
+        component:()=>import('../views/Address.vue')
+      },
+      {
+        path:'/city',
+        name:'city',
+        component:()=>import('../views/City.vue')
       }
     ]
   },
@@ -35,16 +45,6 @@ Vue.use(VueRouter)
     path:'/login',
     name:'login',
     component:()=>import("../views/Login.vue")
-  },
-  {
-    path:'/address',
-    name:'address',
-    component:()=>import('../views/Address.vue')
-  },
-  {
-    path:'/city',
-    name:'city',
-    component:()=>import('../views/City.vue')
   }
 ]
 
