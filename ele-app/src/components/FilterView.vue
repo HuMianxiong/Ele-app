@@ -38,8 +38,8 @@
             </div>
         </div>
         <div class="morefilter-btn">
-            <span :class="{'edit':edit}"  class="morefilter-clear">清空</span>
-            <span class="morefilter-ok">确定</span>
+            <span @click="clearFilter" :class="{'edit':edit}"  class="morefilter-clear">清空</span>
+            <span  @click='filterOk' class="morefilter-ok">确定</span>
         </div>
     </section>
   </div>
@@ -123,7 +123,39 @@ export default {
         }
         item.select = !item.select;
     },
-
+    clearFilter(){
+        this.filterData.screenBy.forEach(screen=>{
+            screen.data.forEach(item=>{
+                item.select = false;
+            })
+        })
+    },
+    filterOk(){
+        let screenData={
+            MPI:"",
+            offer:"",//优惠活动
+            per:""
+        }
+        let mpiStr = ''
+        this.filterData.screenBy.forEach(screen=>{
+            screen.data.forEach((item)=>{
+                if(item.select){
+                    //两种情况 1.多选 2.单选
+                    if(screen.id!=="MPI"){
+                        //单选
+                        screenData[screen.id]=item.code;
+                    }else{
+                        //多选 蜂鸟,品牌
+                        mpiStr += item.code+",";
+                        screenData[screen.id] = mpiStr;
+                    }
+                }
+            })
+        })
+        // console.log(mpiStr)
+        this.$emit("update",{condition:screenData})
+        this.hideView()
+    }
   }
 };
 </script>
