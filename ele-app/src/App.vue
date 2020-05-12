@@ -18,7 +18,7 @@ export default {
           // 是否使用高精度定位，默认：true
           enableHighAccuracy: true,
           // 设置定位超时时间，默认：无穷大
-          timeout: 10000
+          timeout: 2000
         });
 
         geolocation.getCurrentPosition();
