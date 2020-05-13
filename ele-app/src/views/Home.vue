@@ -36,13 +36,23 @@
     <div class="shoplist-title">
       推荐商家
     </div>
+    <!-- 导航 -->
     <FilterView :filterData='filterData' @searchFixed="showFilterView" @update="update"/>
+    <!-- 商家信息 -->
+  <mt-loadmore :top-method="loadData" :bottom-method="loadMore" :bottom-all-loaded="allLoaded" :auto-fill="false" :bottomPullText="bottomPullText" ref="loadmore">
+  <div class="shoplist">
+      <IndexShop v-for="(item,index) in restaurants" :key="index" :restaurant = "item.restaurant"/>
+    </div>
+</mt-loadmore>
+
+    
   </div>
 </template>
 
 <script>
 import {} from "mint-ui";
 import FilterView from '../components/FilterView'
+import IndexShop from '../components/IndexShop'
 export default {
   name: "home",
   data() {
@@ -50,11 +60,18 @@ export default {
       swipeImgs: [],
       entries: [],
       filterData:null,
-      showFilter:false
+      showFilter:false,
+      page:1,
+      size:5,
+      restaurants:[],//存放所有商家容器
+      allLoaded:false,
+      bottomPullText:"上拉加载更多",
+      data:null
     };
   },
   components:{
-    FilterView
+    FilterView,
+    IndexShop
   },
   computed: {
     address() {
@@ -80,13 +97,50 @@ export default {
       this.$axios("/api/profile/filter").then(res=>{
         console.log(res.data);
         this.filterData = res.data;
-      })
+      });
+      this.loadData();
     },
     showFilterView(isShow){
       this.showFilter = isShow
     },
     update(condition){
-      console.log(condition)
+      // console.log(condition)
+      this.data = condition;
+      this.loadData()
+    },
+    loadData(){
+      this.page = 1;
+      this.allLoaded = false;
+      this.buttomPullText = '上拉加载更多'
+       //拉取商家信息
+      this.$axios.post(`/api/profile/restaurants/${this.page}/${this.size}`,this.data).then(res=>{
+        console.log(res.data);
+        this.restaurants = res.data;
+        this.$refs.loadmore.onTopLoaded();
+      })
+    },
+    loadMore(){
+      if(!this.allLoaded){
+        this.page++;
+         //拉取商家信息
+      this.$axios.post(`/api/profile/restaurants/${this.page}/${this.size}`).then(res=>{
+        //加载完之后重新渲染
+        this.$refs.loadmore.onBottomLoaded();
+        if(res.data.length>0){
+          res.data.forEach(item=>{
+            this.restaurants.push(item);
+          })
+          if(res.data<this.size){
+            this.allLoaded = true;
+            this.bottomPullText = "没有更多了哦"
+          }
+        }else{
+          //数据为空
+          this.allLoaded = true;
+          this.bottomPullText = "没有更多了哦"
+        }
+      })
+      }
     }
   }
 };
@@ -199,5 +253,9 @@ export default {
   position:fixed;
   top:0px;
   z-index:999;
+}
+.mint-loadmore{
+  height:calc(100% - 95px);
+  overflow:auto;
 }
 </style>
