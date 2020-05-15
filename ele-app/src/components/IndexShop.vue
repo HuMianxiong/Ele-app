@@ -26,7 +26,7 @@
         </div>
 
         <!-- 第三行 配送 -->
-        <div class="index-moneyLimit">
+        <div class="index-moneylimit">
           <div>
             <span>￥{{restaurant.float_minimum_order_amount}}起送</span>
             |
