@@ -13,28 +13,47 @@
           </div>
       </nav>
 
-      <!-- 弹窗的title -->
+      <!-- 商家信息 -->
       <div class="index-rst">
           <div class="rst-name">
-              <span>{{shopInfo.rst.name}}</span>
+              <span @click="showInfoModel=true">{{shopInfo.rst.name}}</span>
               <i class="fa fa-caret-right"></i>
           </div>
-          <InfoModel :rst="shopInfo.rst"/>
+          <!-- 弹窗信息 -->
+          <InfoModel :rst="shopInfo.rst" :showInfoModel="showInfoModel" @close="showInfoModel = false"/>
+          <!-- 评分月售 -->
+          <div class="rst-order">
+              <span>评分{{shopInfo.rst.rating}}</span>
+              <span>月售{{shopInfo.rst.recent_order_num}}单</span>
+              <span>蜂鸟专送约{{shopInfo.rst.order_lead_time}}分钟</span>
+          </div>
+          <!-- 优惠信息 -->
+          <Activity :activities="shopInfo.rst.activities"/>
+          <!-- 公告 -->
+          <p class="rst-promotion">公告：{{shopInfo.rst.promotion_info}}</p>
+        
       </div>
+      <NavBar/>
+      <router-view></router-view>
   </div>
 </template>
 
 <script>
 import InfoModel from '../../components/Shops/InfoModel'
+import Activity from '../../components/Shops/Activity'
+import NavBar from '../../components/Shops/NavBar'
 export default {
     name:"Shop",
     data(){
         return {
-            shopInfo:null
+            shopInfo:null,
+            showInfoModel:false
         }
     },
     components:{
-        InfoModel
+        InfoModel,
+        Activity,
+        NavBar
     },
     created(){
         this.getData();
@@ -114,5 +133,27 @@ export default {
     text-align:left;
     overflow:hidden;
     text-overflow:ellipsis;
+}
+.index-rst .rst-order{
+    white-space:nowrap;
+    height:3.2vw;
+    margin-top:1.733333vw;
+    color:#666;
+    text-align: center;
+    font-size: 0.6rem;
+}
+.rst-order span{
+    margin:0 3px;
+}
+.index-rst .rst-promotion{
+    width:80vw;
+    font-size: 0.6rem;
+    color:#999;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    /* auto 浏览器计算外边距 */
+    margin:2.266667vw auto 2.666667vw;
+    padding:0;
+    white-space:nowrap;
 }
 </style>

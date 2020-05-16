@@ -54,13 +54,32 @@ Vue.use(VueRouter)
   {
     path:'/shop',
     name:'shop',
-    component:()=>import('../views/Shops/Shop.vue')
+    redirect:'/goods',
+    component:()=>import('../views/Shops/Shop.vue'),
+    children:[
+      {
+        path:'/goods',
+        name:'goods',
+        component:()=>import('../views/Shops/Goods.vue')
+      },
+      {
+        path:'/comments',
+        name:'comments',
+        component:()=>import('../views/Shops/Comments.vue')
+      },
+      {
+        path:'/seller',
+        name:'seller',
+        component:()=>import('../views/Shops/Seller.vue')
+      }
+    ]
   }
 ]
 
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
+  linkActiveClass:'active',
   routes
 })
 
