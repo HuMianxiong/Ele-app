@@ -3,7 +3,7 @@
       <span @click.stop="decreaseCount" class="cartbutton button-minus" v-if="food.count>0">
           <i class="fa fa-minus"></i>
       </span>
-      <span class="cartcount" v-if="food.count">{{food.count}}</span>
+      <span class="cartcount" v-if="food.count>0">{{food.count}}</span>
       <span @click.stop="increaseCount" class="cartbutton">
           <i class="fa fa-plus-circle">
 

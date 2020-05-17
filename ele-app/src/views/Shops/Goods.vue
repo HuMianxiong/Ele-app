@@ -23,9 +23,9 @@
     <!-- 商品分类 -->
     <div class="menuview">
       <!-- 左侧分类列表 -->
-      <div class="menu-wrapper">
+      <div class="menu-wrapper" ref="menuScroll">
         <ul>
-          <li v-for="(item,index) in shopInfo.menu" :key="index">
+          <li v-for="(item,index) in shopInfo.menu" :key="index" @click="selectMenu(index)" :class="{'current':currentIndex===index}">
             <img :src="item.icon_url" alt v-if="item.icon_url" />
             <span>{{item.name}}</span>
           </li>
@@ -33,7 +33,7 @@
       </div>
 
       <!--右侧商品内容  -->
-      <div class="foods-wrapper">
+      <div class="foods-wrapper" ref="foodScroll">
         <ul>
           <li class="food-list-hook" v-for="(item,index) in shopInfo.menu" :key="index">
             <!-- 内容上 -->
@@ -42,7 +42,7 @@
               <span>{{item.description}}</span>
             </div>
             <!-- 内容下 -->
-            <div class="fooddetails" v-for="(food,i) in item.foods" :key="i">
+            <div @click="handleFood(food)"  class="fooddetails" v-for="(food,i) in item.foods" :key="i">
               <!-- 左 -->
               <img :src="food.image_path" alt />
               <!-- 右 -->
@@ -60,23 +60,56 @@
         </ul>
       </div>
     </div>
+
+    <!-- 购物车 -->
+    <ShopCart :shopInfo="shopInfo"/>
+
+    <!-- 商品详情 -->
+    <Food :food="selectedFood" :isShow="showFood" @close="showFood=false"/>
   </div>
 </template>
 
 <script>
 import CartControll from "../../components/Shops/CartControll";
+import BScroll from 'better-scroll'
+import ShopCart from '../../views/Shops/ShopCart'
+import Food from './Food'
 export default {
   name: "Goods",
   data() {
     return {
-      shopInfo: null
+      shopInfo: null,
+      menuScroll:{},//左侧滚动对象
+      foodScroll:{},//右侧滚动对象
+      scrollY:0,//右侧菜单当前滚动到的y值
+      listHeight:[],//12个区列表高度
+      selectedFood:null,
+      showFood:false
     };
   },
   components: {
-    CartControll
+    CartControll,
+    ShopCart,
+    Food
   },
   created() {
     this.getData();
+  },
+  computed:{
+    //根据右侧滚动的位置，确定对应的索引下标
+    currentIndex(){
+      for(let i=0;i<this.listHeight.length;i++){
+        let height1 = this.listHeight[i];
+        let height2 = this.listHeight[i+1];
+        //判断是否在两个高度之间
+        if(this.scrollY>=height1 && this.scrollY<height2){
+          return i;
+        }
+
+      }
+      return 0;
+    }
+    
   },
   methods: {
     getData() {
@@ -94,8 +127,53 @@ export default {
             })
         })
         this.shopInfo = res.data;
-        console.log(this.shopInfo);
+        // console.log(this.shopInfo);
+        this.$nextTick(()=>{
+          //DOM已经更新
+          this.initScroll();
+          //计算12个区的高度
+          this.calculateHeight();
+        })
       });
+    },
+    initScroll(){
+      this.menuScroll = new BScroll(this.$refs.menuScroll,{
+        click:true
+      });
+      this.foodScroll = new BScroll(this.$refs.foodScroll,{
+        probeType:3,
+        click:true
+      });
+      this.foodScroll.on("scroll",pos=>{
+        // console.log(pos.y)
+        this.scrollY = Math.abs(Math.round(pos.y));
+      })
+    },
+    selectMenu(index){
+      // console.log(index)
+      let foodlist = this.$refs.foodScroll.getElementsByClassName("food-list-hook");
+      let el = foodlist[index];
+      // console.log(el)
+      //滚动到对应元素的位置
+      this.foodScroll.scrollToElement(el,250);
+    },
+    calculateHeight(){
+      let foodlist = this.$refs.foodScroll.getElementsByClassName("food-list-hook");
+      //每个区的高度添加到数组中
+      let height = 0;
+      this.listHeight.push(height)
+      for(let i=0;i<foodlist.length-1;i++){
+        let item = foodlist[i];
+        //累加
+        height += item.clientHeight;
+        this.listHeight.push(height)
+      }
+      console.log(this.listHeight)
+    },
+    handleFood(food){
+      console.log(food);
+      this.selectedFood = food;
+      this.showFood = true;
     }
   }
 };
@@ -279,5 +357,9 @@ export default {
     padding-bottom: 0.933333vw;
     display: flex;
     align-items: baseline;
+}
+.menu-wrapper .current{
+  background-color: #fff !important;
+  color:#333 !important;
 }
 </style>

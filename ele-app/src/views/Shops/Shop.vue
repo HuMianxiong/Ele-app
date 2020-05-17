@@ -61,7 +61,7 @@ export default {
     methods:{
         getData(){
             this.$axios("/api/profile/batch_shop").then(res=>{
-                console.log(res.data)
+                // console.log(res.data)
                 this.shopInfo = res.data;
             })
         }
