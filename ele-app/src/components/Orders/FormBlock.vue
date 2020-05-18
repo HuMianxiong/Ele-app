@@ -1,7 +1,7 @@
 <template>
   <div class="formblock">
     <div class="label-wrap">{{label}}</div>
-    <div class="input-group-wrap">
+    <div class="input-group-wrap" @click="$emit('click')">
       <div class="input-wrap">
         <input
           v-if="!textarea"
@@ -21,11 +21,13 @@
         ></textarea>
         <i v-if="icon" :class="'fa fa-'+icon"></i>
       </div>
+      <TabTag v-if="tags" :tags="tags" @checkTag="checkTag" :selectTag="sex" />
     </div>
   </div>
 </template>
 
 <script>
+import TabTag from "./TabTag";
 export default {
   name: "FormBlock",
   props: {
@@ -37,7 +39,18 @@ export default {
     value: String,
     placeholder: String,
     icon: String,
-    textarea: String
+    textarea: String,
+    tags: Array,
+    sex: String
+  },
+  components: {
+    TabTag
+  },
+  methods: {
+    checkTag(item) {
+      //   console.log(item);
+      this.$emit("checkSex", item);
+    }
   }
 };
 </script>
